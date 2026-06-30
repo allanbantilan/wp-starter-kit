@@ -1,0 +1,34 @@
+# Secrets
+.env
+
+# Logs
+*.log
+wp-content/debug.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# WordPress core (lives in the wp_core Docker volume; ignore if ever on host)
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/xmlrpc.php
+/license.txt
+/readme.html
+
+# wp-content: runtime + bundled defaults (WP-managed, not committed)
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/index.php
+wp-content/themes/index.php
+wp-content/plugins/index.php
+wp-content/themes/twenty*/
+wp-content/plugins/akismet/
+wp-content/plugins/hello.php
+wp-content/plugins/query-monitor/
+
+# Everything else under wp-content (custom themes/plugins/mu-plugins) IS committed.
+docs/superpowers/
