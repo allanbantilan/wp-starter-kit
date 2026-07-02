@@ -31,4 +31,4 @@ wp-content/plugins/hello.php
 wp-content/plugins/query-monitor/
 
 # Everything else under wp-content (custom themes/plugins/mu-plugins) IS committed.
-docs/superpowers/
+/docs/
