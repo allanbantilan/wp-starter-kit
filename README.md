@@ -1,72 +1,112 @@
-# WordPress + Docker Starter Kit
+# WordPress Docker Starter Kit
 
-Lean, reusable local-dev environment for WordPress — built to feel familiar if
-you come from Laravel. Provisions **infrastructure + dev tooling only**.
-Project-specific plugins (ACF, etc.) and real themes are added per-project.
+Local WordPress development stack built from official Docker images:
 
-- WordPress (PHP 8.2, Apache) on http://localhost:8080
-- MySQL 8.0 with healthcheck
-- Long-running WP-CLI service
-- Query Monitor as the only pre-installed plugin
-- A minimal, design-agnostic `starter` theme to build on or replace
+- WordPress 7 on PHP 8.3/Apache: http://localhost
+- phpMyAdmin 5.2: http://localhost:8080
+- MySQL 8.4, private to the Compose network
+- Disposable WP-CLI container for maintenance and automation
+- Narrow-mounted `starter` theme for project code
 
-## Setup (clone → running site)
+> **Local development only.** This stack has no HTTPS, production secrets,
+> backups, deployment workflow, or production hardening. Do not expose it to a
+> public network or deploy it as-is.
+
+## Requirements
+
+- Docker with Compose v2 (`docker compose`)
+- GNU Make
+- Free local ports 80 and 8080, unless overridden
+
+## Setup
 
 ```bash
-git clone <your-repo-url> wordpress-docker-starter-kit && cd wordpress-docker-starter-kit
-cp .env.example .env        # adjust credentials if you like
-make up                     # start db + wordpress + wp-cli
-make install                # wp core install + Query Monitor + activate starter theme
+cp .env.example .env
+# Edit .env and replace the local credentials.
+make up
+make install
 ```
 
-Open http://localhost:8080 (admin at `/wp-admin`, credentials from `.env`).
+Open WordPress at http://localhost and its admin at
+http://localhost/wp-admin. `WP_ADMIN_USER`, `WP_ADMIN_PASSWORD`, and
+`WP_ADMIN_EMAIL` are used only during the initial installation. Editing them in
+`.env` later does not change an existing WordPress user.
 
-## Make targets
+To change an existing user's password without putting it in shell history:
 
-| Target | Does |
+```bash
+docker compose run --rm wpcli user update <username> --prompt=user_pass
+```
+
+Alternatively, reset the whole local site with `make clean CONFIRM=1`, then run
+`make up` and `make install` with the new initial credentials.
+
+Open phpMyAdmin at http://localhost:8080. Log in with `DB_USER` and
+`DB_PASSWORD`; use `db` as the server/host if prompted.
+
+`make install` is repeatable. It installs WordPress only when core is not yet
+installed, then always aligns `home` and `siteurl` with `WP_URL`, activates the
+`starter` theme, and sets the permalink structure.
+
+## Commands
+
+| Command | Purpose |
 |---|---|
-| `make up` | Start all services (detached) |
-| `make down` | Stop services (keeps data) |
-| `make install` | Non-interactive `wp core install`, install/activate Query Monitor, activate `starter` theme |
-| `make debug-on` | Set `WP_DEBUG`, `WP_DEBUG_LOG`, `WP_DEBUG_DISPLAY`, `SCRIPT_DEBUG` |
-| `make logs` | Tail logs |
-| `make clean` | Stop **and delete volumes** (fresh start) |
+| `make up` | Start services and wait for health checks |
+| `make down` | Stop services while keeping data |
+| `make install` | Install or reconcile the local WordPress site |
+| `make logs` | Follow service logs |
+| `make clean CONFIRM=1` | Stop services and permanently delete named volumes |
 
-Run any WP-CLI command directly:
+Run WP-CLI in a disposable container:
 
 ```bash
-docker compose exec wpcli wp plugin list
+docker compose run --rm wpcli plugin list
+docker compose run --rm wpcli core version
 ```
 
-## What's committed vs. not
+The image entrypoint is already `wp`; do not add another `wp` argument.
 
-Core, uploads, cache, default themes/plugins, `.env`, and logs are gitignored.
-You commit only **custom code** — the `starter` theme and any custom
-plugins/mu-plugins you add under `wp-content/`.
+## Data and custom code
 
-## The `starter` theme
+Database files, WordPress files, and uploads persist in the `db_data`,
+`wp_data`, and `uploads` named volumes. `make down` keeps them. To reset the
+site completely, run:
 
-A near-empty, neutral base. `index.php` is WordPress's universal
-template-hierarchy fallback, so this one theme already renders every route.
-Add `single.php`, `page.php`, `archive.php`, etc. as your design grows — or
-delete the theme and drop in your own. Nothing here is opinionated.
+```bash
+make clean CONFIRM=1
+make up
+make install
+```
 
-## WordPress request lifecycle, mapped to Laravel
+Only `wp-content/themes/starter` is bind-mounted from this repository, read
+only. Core, uploads, installed plugins, and other themes live in named volumes
+and are not project source. For future custom themes, plugins, or mu-plugins,
+add narrow bind mounts for their individual directories under `volumes:` on
+both the `wordpress` and `wpcli` services.
 
-Same request, different names. If you know the Laravel column, you know where
-to hook in WordPress.
+## Ports and URLs
 
-| Stage | Laravel | WordPress |
-|---|---|---|
-| Entry point | `public/index.php` | `index.php` → `wp-blog-header.php` |
-| Bootstrap | `bootstrap/app.php`, kernel | `wp-load.php` → `wp-settings.php` |
-| Providers / plugins | Service providers (`register`/`boot`) | Plugins + theme `functions.php` loaded; `plugins_loaded`, `init` |
-| Routing / query | Router matches a route | `WP::main()` parses the URL → `WP_Query` (the "main query") |
-| Middleware / hooks | Middleware pipeline | Actions & filters (`pre_get_posts`, `template_redirect`, …) |
-| Controller / template | Controller method | Template-hierarchy file (`single.php`, `page.php`, … or `index.php`) |
-| View / output | Blade view | Theme template + The Loop render HTML |
+Override `WP_PORT` or `PMA_PORT` in `.env` when ports 80 or 8080 are occupied.
+When changing `WP_PORT`, keep `WP_URL` aligned, including the port:
 
-Mental model: WordPress has **no explicit routes or controllers** — the URL is
-resolved into a database query (`WP_Query`), and the matching template file
-plays the role of the controller+view. Hooks are your middleware: they let you
-intervene at any stage without editing core.
+```dotenv
+WP_PORT=8081
+WP_URL=http://localhost:8081
+PMA_PORT=8082
+```
+
+Then run `make up` and `make install` so WordPress stores the updated URL.
+
+## Image updates
+
+Pull all configured image tags, then recreate services:
+
+```bash
+docker compose --profile tools pull
+make up
+```
+
+Image tags can bring upstream changes. Read WordPress, MySQL, phpMyAdmin, and
+WP-CLI release notes before updating or publishing a release of this kit, and
+test with disposable data first.
