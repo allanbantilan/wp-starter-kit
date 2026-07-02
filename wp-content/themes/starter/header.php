@@ -18,7 +18,7 @@
       <?php if (is_user_logged_in()) : ?>
         <a class="button" href="<?php echo esc_url(wp_logout_url(home_url('/'))); ?>"><?php esc_html_e('Log out', 'starter'); ?></a>
       <?php else : ?>
-        <a class="button" href="<?php echo esc_url(wp_login_url(home_url('/dashboard/'))); ?>"><?php esc_html_e('Log in', 'starter'); ?></a>
+        <a class="button" href="<?php echo esc_url(wp_login_url(home_url('/'))); ?>"><?php esc_html_e('Log in', 'starter'); ?></a>
       <?php endif; ?>
     </div>
   </div>

@@ -89,16 +89,8 @@ main.site { padding-block: var(--s5); display: grid; gap: var(--s4); }
 .site-nav a { color: var(--muted); font-weight: 500; }
 .site-nav a:hover { color: var(--text); }
 
-/* utilities */
-.stack { display: grid; gap: var(--s2); }
-.actions { display: flex; gap: var(--s2); flex-wrap: wrap; }
-.muted { color: var(--muted); }
-.dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--s1) var(--s3); margin: 0; }
-.dl dt { color: var(--muted); font-weight: 600; }
-.dl dd { margin: 0; }
-
 /* ── Post cards ─────────────────────────────────────────── */
-article, .card {
+article {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
