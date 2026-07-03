@@ -67,6 +67,17 @@ docker compose run --rm wpcli core version
 
 The image entrypoint is already `wp`; do not add another `wp` argument.
 
+The WP-CLI image uses MariaDB client utilities, which reject MySQL's generated
+self-signed certificate. For local `wp db` commands that invoke those
+utilities, disable certificate verification explicitly:
+
+```bash
+docker compose run --rm wpcli db check --ssl-verify-server-cert=0
+```
+
+This override is only for the private local Compose network. Production
+database clients should verify a trusted CA.
+
 ## Data and custom code
 
 Database files persist in `db_data`. WordPress core, plugins, and uploads
