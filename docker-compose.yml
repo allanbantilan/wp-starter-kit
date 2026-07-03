@@ -55,6 +55,7 @@ services:
 
   wpcli:
     image: wordpress:cli-php8.3
+    user: "33:33"
     profiles: [tools]
     depends_on:
       wordpress:
