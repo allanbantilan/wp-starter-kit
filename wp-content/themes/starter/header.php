@@ -8,13 +8,16 @@
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<a class="skip-link" href="#main-content"><?php esc_html_e('Skip to content', 'starter'); ?></a>
 <header class="site-header">
   <div class="site">
     <a class="brand" href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a>
     <div class="header-actions">
-      <nav class="site-nav" aria-label="<?php esc_attr_e('Primary', 'starter'); ?>">
-        <?php wp_nav_menu(['theme_location' => 'primary', 'container' => false, 'fallback_cb' => false, 'depth' => 1]); ?>
-      </nav>
+      <?php if (has_nav_menu('primary')) : ?>
+        <nav class="site-nav" aria-label="<?php esc_attr_e('Primary', 'starter'); ?>">
+          <?php wp_nav_menu(['theme_location' => 'primary', 'container' => false, 'fallback_cb' => false, 'depth' => 1]); ?>
+        </nav>
+      <?php endif; ?>
       <?php if (is_user_logged_in()) : ?>
         <a class="button" href="<?php echo esc_url(wp_logout_url(home_url('/'))); ?>"><?php esc_html_e('Log out', 'starter'); ?></a>
       <?php else : ?>
@@ -23,4 +26,4 @@
     </div>
   </div>
 </header>
-<main class="site">
+<main id="main-content" class="site" tabindex="-1">
