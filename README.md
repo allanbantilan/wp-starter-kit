@@ -111,10 +111,12 @@ Then run `make up` and `make install` so WordPress stores the updated URL.
 
 ## Image updates
 
-Pull all configured image tags, then recreate services:
+Pull official service images, rebuild the small WP-CLI derivative, then
+recreate services:
 
 ```bash
 docker compose --profile tools pull
+docker compose build --pull wpcli
 make up
 ```
 
