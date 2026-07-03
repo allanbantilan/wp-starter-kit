@@ -69,9 +69,9 @@ The image entrypoint is already `wp`; do not add another `wp` argument.
 
 ## Data and custom code
 
-Database files, WordPress files, and uploads persist in the `db_data`,
-`wp_data`, and `uploads` named volumes. `make down` keeps them. To reset the
-site completely, run:
+Database files persist in `db_data`. WordPress core, plugins, and uploads
+persist in `wp_data`. `make down` keeps both volumes. To reset the site
+completely, run:
 
 ```bash
 make clean CONFIRM=1
