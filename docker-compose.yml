@@ -54,7 +54,9 @@ services:
       PMA_HOST: db
 
   wpcli:
-    image: wordpress:cli-php8.3
+    build:
+      context: .
+      dockerfile: Dockerfile.wpcli
     user: "33:33"
     profiles: [tools]
     depends_on:
