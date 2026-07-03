@@ -7,8 +7,8 @@ down:
 	docker compose down --remove-orphans
 
 install:
-	docker compose run --rm -T --entrypoint sh wpcli -ec 'if ! wp core is-installed; then \
-			wp core install \
+	docker compose run --rm -T --entrypoint sh wpcli -ec 'if ! wp --exec="\$$_SERVER[\"HTTP_HOST\"] = \"$${WP_URL#*://}\";" core is-installed; then \
+			wp --exec="\$$_SERVER[\"HTTP_HOST\"] = \"$${WP_URL#*://}\";" core install \
 				--url="$$WP_URL" \
 				--title="$$WP_TITLE" \
 				--admin_user="$$WP_ADMIN_USER" \
